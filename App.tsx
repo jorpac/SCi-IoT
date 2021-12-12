@@ -18,16 +18,10 @@ import {
   useColorScheme,
   View,
   Image,
-  useWindowDimensions
+  useWindowDimensions,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const Section: React.FC<{
   title: string;
@@ -60,11 +54,11 @@ const Section: React.FC<{
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const { height, width } = useWindowDimensions();
+  const {height} = useWindowDimensions();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-    paddingTop: 10
+    paddingTop: 10,
   };
 
   return (
@@ -73,19 +67,23 @@ const App = () => {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Image source={require('./imgs/logo.jpg')} style={{width: '100%'}}/>
+        <Image source={require('./imgs/logo.jpg')} style={{width: '100%'}} />
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
             justifyContent: 'center',
             alignSelf: 'center',
-            paddingTop: height/6
+            paddingTop: height / 6,
           }}>
           <Section title="Search for device">
-            Search for your <Text style={styles.highlight}>Heart Rate monitoring device</Text> and start receiving data.
+            Search for your{' '}
+            <Text style={styles.highlight}>Heart Rate monitoring device</Text>{' '}
+            and start receiving data.
           </Section>
           <Section title="Master device">
-            Are you the master? Do you <Text style={styles.highlight}>receive alerts</Text> from other smartphones?
+            Are you the master? Do you{' '}
+            <Text style={styles.highlight}>receive alerts</Text> from other
+            smartphones?
           </Section>
         </View>
       </ScrollView>
@@ -98,7 +96,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
     paddingHorizontal: 24,
     paddingTop: 30,
-    paddingBottom: 30
+    paddingBottom: 30,
   },
   sectionTitle: {
     fontSize: 24,
