@@ -22,7 +22,7 @@ jobs:
     - name: abc
       run: npx react-native bundle --dev false --platform android --entry-file index.js --bundle-output ./android/app/src/main/assets/index.android.bundle --assets-dest ./android/app/src/main/res
     - name: Make Gradle executable
-      run: chmod +x gradlew
+      run: cd android && chmod +x gradlew
     - name: Build Release APK
       run: ./gradlew assembleRelease
     - name: Releasing using Hub
