@@ -1,3 +1,5 @@
 rootProject.name = 'SmartHealth'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':tsm-react-native-mqtt'
+project(':tsm-react-native-mqtt').projectDir = new File(rootProject.projectDir,  '../node_modules/tsm-react-native-mqtt/android')
 include ':app'
