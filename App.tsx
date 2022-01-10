@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -19,9 +20,11 @@ import {
   View,
   Image,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import MQTT from 'tsm-react-native-mqtt';
 
 const Section: React.FC<{
   title: string;
@@ -52,6 +55,39 @@ const Section: React.FC<{
   );
 };
 
+function activateMQTT() {
+  MQTT.createClient({
+    uri: 'mqtt://test.mosquitto.org:1883',
+    clientId: 'abcd' + Math.floor(Math.random() * 100),
+  })
+    .then(function (client) {
+      console.log('MQTT client activated', Math.floor(Math.random() * 100));
+      client.on('closed', function () {
+        console.log('mqtt.event.closed');
+      });
+
+      client.on('error', function (msg) {
+        console.log('mqtt.event.error', msg);
+      });
+
+      client.on('message', function (msg) {
+        console.log('mqtt.event.message', msg);
+      });
+
+      client.on('connect', function () {
+        console.log('connected');
+        client.subscribe('/heart_rate', 0);
+        client.publish('/heart_rate', 'test', 0, false, true);
+      });
+
+      client.connect();
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+  return 1;
+}
+
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
   const {height} = useWindowDimensions();
@@ -75,11 +111,13 @@ const App = () => {
             alignSelf: 'center',
             paddingTop: height / 6,
           }}>
-          <Section title="Search for device">
-            Search for your{' '}
-            <Text style={styles.highlight}>Heart Rate monitoring device</Text>{' '}
-            and start receiving data.
-          </Section>
+          <TouchableOpacity onPress={() => activateMQTT()}>
+            <Section title="Search for device">
+              Search for your{' '}
+              <Text style={styles.highlight}>Heart Rate monitoring device</Text>{' '}
+              and start receiving data.
+            </Section>
+          </TouchableOpacity>
           <Section title="Master device">
             Are you the master? Do you{' '}
             <Text style={styles.highlight}>receive alerts</Text> from other
