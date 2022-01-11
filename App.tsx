@@ -58,7 +58,15 @@ const Section: React.FC<{
 function activateMQTT() {
   MQTT.createClient({
     uri: 'mqtt://test.mosquitto.org:1883',
-    clientId: 'abcd' + Math.floor(Math.random() * 100),
+    clientId: 'abcd' + Math.floor(Math.random() * 100),/*
+    clientId: 'Medphd1',
+    uri: 'mqtts://a2c1d7385b234cd6a8ae4d287bfd8857.s1.eu.hivemq.cloud:8884', 
+    host: 'a2c1d7385b234cd6a8ae4d287bfd8857.s1.eu.hivemq.cloud',
+    port: 8884,
+    protocol: 'mqtts',
+    user: 'Medphd1',
+    pass: '123456.mM',*/
+    automaticReconnect: true
   })
     .then(function (client) {
       console.log('MQTT client activated', Math.floor(Math.random() * 100));
@@ -77,9 +85,9 @@ function activateMQTT() {
       client.on('connect', function () {
         console.log('connected');
         client.subscribe('/heart_rate', 0);
-        client.publish('/heart_rate', 'test', 0, false, true);
+        client.publish('/heart_rate', "test", 0, true, true);
       });
-
+      
       client.connect();
     })
     .catch(function (err) {
