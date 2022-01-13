@@ -92,36 +92,46 @@ function activateMQTT(topic, message, values, timestamp, id) {
 
 const PatientScreen = ({navigation}) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [listElements, setListElements] = useState([]);
+  const [listElements, setListElements] = useState([0]);
   const [loadedElement, setLoadedElement] = useState(false);
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     paddingTop: 2,
   };
 
-  async function generate() {
-    setLoadedElement(false);
-    let a = 20 + Math.floor(Math.random() * 100);
-    let tempList = listElements;
-    tempList.push(a);
-    tempList.reverse();
-    setListElements(tempList);
-    console.log(listElements);
-    setLoadedElement(true);
-    if (a < 40 || a > 190) {
-      activateMQTT(
-        '/heart_rate',
-        'low values!',
-        tempList.slice(0, 2),
-        new Date().getTime(),
-        'abc',
-      );
+  let last_time = new Date().getTime();
+  let i = 1;
+  var tempList = [];
+  function generate() {
+    let new_time = new Date().getTime();
+    i++;
+    console.log('time' + new_time + 'last' + last_time);
+    if (new_time - last_time > 900 * i * (i > 100 ? i : 1)) {
+      last_time = new_time;
+      setLoadedElement(false);
+      let a = 20 + Math.floor(Math.random() * 100);
+      tempList = listElements;
+      tempList.unshift(a);
+      //tempList = tempList.reverse();
+      setListElements(tempList);
+      console.log(listElements);
+      setLoadedElement(true);
+      tempList = [];
+      if (a < 40 || a > 190) {
+        activateMQTT(
+          '/heart_rate',
+          'low values!',
+          tempList.slice(0, 2),
+          new Date().getTime(),
+          'abc',
+        );
+      }
     }
   }
   useEffect(() => {
     setInterval(() => {
       generate();
-    }, 10000);
+    }, 1000);
     const backAction = () => {
       Alert.alert('Hold on!', 'Are you sure you want to go back?', [
         {
