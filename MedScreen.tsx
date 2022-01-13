@@ -80,9 +80,7 @@ const MedScreen = ({navigation}) => {
       });
     return 1;
   }
-  useEffect(() => {
-    activateMQTT('/heart_rate', '', '12', false);
-  });
+  activateMQTT('/heart_rate', '', '12', false);
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />

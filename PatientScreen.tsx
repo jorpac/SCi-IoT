@@ -30,7 +30,6 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import MQTT from 'tsm-react-native-mqtt';
 
-
 function activateMQTT(topic, message, values, timestamp, id) {
   MQTT.createClient({
     uri: 'mqtt://test.mosquitto.org:1883',
@@ -51,6 +50,9 @@ function activateMQTT(topic, message, values, timestamp, id) {
       });
       client.on('error', function (msg) {
         console.log('mqtt.event.error', msg);
+        if (msg.includes('32103')) {
+          client.connect();
+        }
       });
 
       client.on('message', function (msg) {
@@ -117,7 +119,9 @@ const PatientScreen = ({navigation}) => {
     }
   }
   useEffect(() => {
-    generate();
+    setInterval(() => {
+      generate();
+    }, 10000);
     const backAction = () => {
       Alert.alert('Hold on!', 'Are you sure you want to go back?', [
         {
@@ -143,10 +147,7 @@ const PatientScreen = ({navigation}) => {
 
     return () => backHandler.remove();
   });
-  setInterval(generate, 10000);
-  function shouldRender() {
-    return loadedElement;
-  }
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -159,18 +160,16 @@ const PatientScreen = ({navigation}) => {
           paddingTop: 2,
         }}
       />
-      {shouldRender() && (
-        <FlatList
-          data={listElements}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              onPress={() => console.log(listElements)}
-              style={styles.listItem}>
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+      <FlatList
+        data={listElements}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => console.log(listElements)}
+            style={styles.listItem}>
+            <Text>{item}</Text>
+          </TouchableOpacity>
+        )}
+      />
     </SafeAreaView>
   );
 };
