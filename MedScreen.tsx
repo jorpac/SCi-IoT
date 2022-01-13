@@ -23,6 +23,8 @@ import {
   TouchableOpacity,
   FlatList,
   Button,
+  Modal,
+  Pressable,
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -36,7 +38,8 @@ const MedScreen = ({navigation}) => {
     paddingTop: 2,
   };
   const [receivedValues, setReceivedValues] = useState([]);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [clickedElement, setClickedElement] = useState(0);
   function activateMQTT(topic, message, id, send) {
     MQTT.createClient({
       uri: 'mqtt://test.mosquitto.org:1883',
@@ -61,7 +64,7 @@ const MedScreen = ({navigation}) => {
             tmpValues.push(msg.data);
             console.log('mqtt.event.message', msg);
             let data = msg.data.split(' ');
-            console.log(data[5]);
+            console.log(data[6]);
             tmpValues.reverse();
             setReceivedValues(tmpValues);
           }
@@ -71,6 +74,9 @@ const MedScreen = ({navigation}) => {
         client.on('connect', function () {
           console.log('connected');
           client.subscribe(topic, 0);
+          if (send) {
+            client.publish(topic, message, 0, true, false);
+          }
         });
 
         client.connect();
@@ -98,7 +104,10 @@ const MedScreen = ({navigation}) => {
           data={receivedValues}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() => console.log(receivedValues)}
+              onPress={() => {
+                setClickedElement(item);
+                setModalVisible(true);
+              }}
               style={styles.listItem}>
               <Text>{item}</Text>
             </TouchableOpacity>
@@ -107,6 +116,26 @@ const MedScreen = ({navigation}) => {
       ) : (
         <Text>Error fetching data</Text>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              {receivedValues[clickedElement]}
+            </Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.textStyle}>Hide Modal</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -140,6 +169,47 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333',
     padding: 25,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 

@@ -64,7 +64,6 @@ function activateMQTT(topic, message, values, timestamp, id) {
 
       client.on('connect', function () {
         console.log('connected');
-        client.subscribe(topic, 0);
         client.publish(
           topic,
           message +
@@ -75,11 +74,13 @@ function activateMQTT(topic, message, values, timestamp, id) {
             ' ' +
             values[2] +
             ' ' +
-            timestamp,
+            timestamp +
+            id,
           0,
           true,
           false,
         );
+        client.subscribe(topic + '/' + id, 0);
       });
 
       client.connect();
