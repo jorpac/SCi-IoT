@@ -39,6 +39,9 @@ const PatientScreen = ({navigation}) => {
   const [loadedElement, setLoadedElement] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [message, setMessage] = useState('');
+  const id = navigation.state.params.id;
+  const high_value = navigation.state.params.high_value;
+  const low_value = navigation.state.params.low_value;
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -49,7 +52,7 @@ const PatientScreen = ({navigation}) => {
   let i = 1;
   var tempList = [];
 
-  function activateMQTT(topic, message, values, timestamp, id) {
+  function activateMQTT(topic, message, values, timestamp) {
     MQTT.createClient({
       uri: 'mqtt://test.mosquitto.org:1883',
       clientId: id /*
@@ -102,6 +105,7 @@ const PatientScreen = ({navigation}) => {
             false,
           );
           client.subscribe(topic + '/' + id, 0);
+          last_time = new Date().getTime() + 15000;
         });
 
         client.connect();
@@ -116,7 +120,6 @@ const PatientScreen = ({navigation}) => {
     let new_time = new Date().getTime();
     i++;
     if (new_time - last_time > 900 * i * (i > 100 ? i : 1)) {
-      last_time = new_time;
       setLoadedElement(false);
       let a = 20 + Math.floor(Math.random() * 100);
       tempList = listElements;
@@ -125,15 +128,15 @@ const PatientScreen = ({navigation}) => {
       setListElements(tempList);
       console.log(listElements);
       setLoadedElement(true);
-      if (a < 40 || a > 190) {
+      if (a < low_value || a > high_value) {
         activateMQTT(
           '/heart_rate',
           'low values!',
-          tempList.slice(0, tempList.length > 3 ? 2 : tempList.length),
+          tempList.slice(0, tempList.length > 3 ? 3 : tempList.length),
           new Date().getTime(),
-          'abc',
         );
       }
+      last_time = new_time + 100000;
       tempList = [];
     }
   }
