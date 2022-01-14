@@ -27,7 +27,7 @@ import {
   Pressable,
   Vibration,
 } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import MQTT from 'tsm-react-native-mqtt';
@@ -82,10 +82,11 @@ const MedScreen = ({navigation}) => {
 
         client.on('connect', function () {
           console.log('connected');
-          client.subscribe(topic, 0);
           if (send) {
             console.log('sent message!' + topic + message);
             client.publish(topic, message, 0, true, false);
+          } else {
+            client.subscribe(topic, 0);
           }
         });
 
@@ -99,6 +100,7 @@ const MedScreen = ({navigation}) => {
   activateMQTT('/heart_rate', '', '12', false);
   function respond() {
     let data = clickedElement.split(' ');
+    console.log(data);
     activateMQTT('/heart_rate/' + data[7], message, '12', true);
     setModalVisible(!modalVisible);
   }
