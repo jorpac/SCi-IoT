@@ -25,10 +25,13 @@ import {
   Button,
   BackHandler,
   Alert,
+  Vibration,
+  Modal
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import MQTT from 'tsm-react-native-mqtt';
+
 
 function activateMQTT(topic, message, values, timestamp, id) {
   MQTT.createClient({
@@ -56,9 +59,7 @@ function activateMQTT(topic, message, values, timestamp, id) {
       });
 
       client.on('message', function (msg) {
-        for (let index = 0; index < msg.toString().length; index++) {
-          console.log(msg.data);
-        }
+        console.log(msg.data);
         console.log('mqtt.event.message', msg);
       });
 
@@ -75,6 +76,7 @@ function activateMQTT(topic, message, values, timestamp, id) {
             values[2] +
             ' ' +
             timestamp +
+            ' ' +
             id,
           0,
           true,
@@ -106,7 +108,6 @@ const PatientScreen = ({navigation}) => {
   function generate() {
     let new_time = new Date().getTime();
     i++;
-    console.log('time' + new_time + 'last' + last_time);
     if (new_time - last_time > 900 * i * (i > 100 ? i : 1)) {
       last_time = new_time;
       setLoadedElement(false);
@@ -117,16 +118,16 @@ const PatientScreen = ({navigation}) => {
       setListElements(tempList);
       console.log(listElements);
       setLoadedElement(true);
-      tempList = [];
       if (a < 40 || a > 190) {
         activateMQTT(
           '/heart_rate',
           'low values!',
-          tempList.slice(0, 2),
+          tempList.slice(0, tempList.length > 3 ? 2 : tempList.length),
           new Date().getTime(),
           'abc',
         );
       }
+      tempList = [];
     }
   }
   useEffect(() => {

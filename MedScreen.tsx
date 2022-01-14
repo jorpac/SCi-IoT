@@ -25,7 +25,9 @@ import {
   Button,
   Modal,
   Pressable,
+  Vibration,
 } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import MQTT from 'tsm-react-native-mqtt';
@@ -40,6 +42,8 @@ const MedScreen = ({navigation}) => {
   const [receivedValues, setReceivedValues] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [clickedElement, setClickedElement] = useState(0);
+  const [message, setMessage] = useState('');
+
   function activateMQTT(topic, message, id, send) {
     MQTT.createClient({
       uri: 'mqtt://test.mosquitto.org:1883',
@@ -54,7 +58,11 @@ const MedScreen = ({navigation}) => {
 
         client.on('error', function (msg) {
           console.log('mqtt.event.error', msg);
-          //setLoadedElement(false);
+          if (msg.includes('32103')) {
+            client.connect();
+          } else if (msg.includes('32109')) {
+            client.reconnect();
+          }
         });
 
         client.on('message', function (msg) {
@@ -67,6 +75,7 @@ const MedScreen = ({navigation}) => {
             console.log(data[6]);
             tmpValues.reverse();
             setReceivedValues(tmpValues);
+            Vibration.vibrate(1000);
           }
           setLoadedElement(true);
         });
@@ -75,6 +84,7 @@ const MedScreen = ({navigation}) => {
           console.log('connected');
           client.subscribe(topic, 0);
           if (send) {
+            console.log('sent message!' + topic + message);
             client.publish(topic, message, 0, true, false);
           }
         });
@@ -87,6 +97,11 @@ const MedScreen = ({navigation}) => {
     return 1;
   }
   activateMQTT('/heart_rate', '', '12', false);
+  function respond() {
+    let data = clickedElement.split(' ');
+    activateMQTT('/heart_rate/' + data[7], message, '12', true);
+    setModalVisible(!modalVisible);
+  }
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -125,13 +140,19 @@ const MedScreen = ({navigation}) => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              {receivedValues[clickedElement]}
-            </Text>
+            <Text style={styles.modalText}>{clickedElement}</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setMessage}
+              value={message}
+            />
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Hide Modal</Text>
+              onPress={() => respond()}>
+              <Text style={styles.textStyle}>
+                Send message to patient{' '}
+                {clickedElement ? clickedElement.split(' ')[7] : ''}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -210,6 +231,12 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });
 
