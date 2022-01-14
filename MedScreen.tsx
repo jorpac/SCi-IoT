@@ -68,7 +68,7 @@ const MedScreen = ({navigation}) => {
         client.on('message', function (msg) {
           setLoadedElement(false);
           let tmpValues = receivedValues;
-          if (!receivedValues.find(element => msg.data == element)) {
+          if (!receivedValues.find(element => msg.data === element)) {
             tmpValues.push(msg.data);
             console.log('mqtt.event.message', msg);
             let data = msg.data.split(' ');
@@ -84,7 +84,13 @@ const MedScreen = ({navigation}) => {
           console.log('connected');
           if (send) {
             console.log('sent message!' + topic + message);
-            client.publish(topic, message, 0, true, false);
+            client.publish(
+              topic,
+              message + new Date().getTime(),
+              0,
+              true,
+              false,
+            );
           } else {
             client.subscribe(topic, 0);
           }

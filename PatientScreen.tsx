@@ -38,6 +38,7 @@ const PatientScreen = ({navigation}) => {
   const [listElements, setListElements] = useState([0]);
   const [loadedElement, setLoadedElement] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [history, setHistory] = useState(['']);
   const [message, setMessage] = useState('');
   const id = navigation.state.params.id;
   const high_value = navigation.state.params.high_value;
@@ -80,9 +81,14 @@ const PatientScreen = ({navigation}) => {
         client.on('message', function (msg) {
           console.log(msg.data);
           console.log('mqtt.event.message', msg);
-          setMessage(msg.data);
-          setModalVisible(true);
-          Vibration.vibrate(1000);
+          if (!history.find(element => msg.data === element)) {
+            let tempHistory = history;
+            tempHistory.push(msg.data);
+            setHistory(tempHistory);
+            setMessage(msg.data);
+            setModalVisible(true);
+            Vibration.vibrate(1000);
+          }
         });
 
         client.on('connect', function () {
