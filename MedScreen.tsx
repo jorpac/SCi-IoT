@@ -86,7 +86,7 @@ const MedScreen = ({navigation}) => {
             console.log('sent message!' + topic + message);
             client.publish(
               topic,
-              message + new Date().getTime(),
+              message + ' ' + new Date().getTime(),
               0,
               true,
               false,

@@ -43,6 +43,7 @@ const PatientScreen = ({navigation}) => {
   const id = navigation.state.params.id;
   const high_value = navigation.state.params.high_value;
   const low_value = navigation.state.params.low_value;
+  let should_send = true;
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -112,6 +113,8 @@ const PatientScreen = ({navigation}) => {
           );
           client.subscribe(topic + '/' + id, 0);
           last_time = new Date().getTime() + 15000;
+          should_send = false;
+          setTimeout(() => (should_send = true), 5000 * i);
         });
 
         client.connect();
@@ -125,7 +128,7 @@ const PatientScreen = ({navigation}) => {
   function generate() {
     let new_time = new Date().getTime();
     i++;
-    if (new_time - last_time > 900 * i * (i > 100 ? i : 1)) {
+    if (should_send && new_time - last_time > 900 * i * (i > 100 ? i : 1)) {
       setLoadedElement(false);
       let a = 20 + Math.floor(Math.random() * 100);
       tempList = listElements;
@@ -137,7 +140,7 @@ const PatientScreen = ({navigation}) => {
       if (a < low_value || a > high_value) {
         activateMQTT(
           '/heart_rate',
-          'low values!',
+          a < low_value ? 'low values!' : 'high values!',
           tempList.slice(0, tempList.length > 3 ? 3 : tempList.length),
           new Date().getTime(),
         );
@@ -207,7 +210,7 @@ const PatientScreen = ({navigation}) => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>{message}</Text>
+            <Text style={styles.modalText}>{message.split(' ')[0]}</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}>
